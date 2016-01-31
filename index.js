@@ -26,10 +26,9 @@ function serverRouter (dft) {
       router.on(route + '/GET', cbs)
     } else {
       Object.keys(cbs).forEach(function (method) {
-        method = method.toUpperCase()
         const ok = methods.indexOf(method.toUpperCase)
         assert.ok(ok, 'method ' + method + ' is not a valid HTTP method')
-        router.on(route + '/' + method, cbs[method])
+        router.on(route + '/' + method.toUpperCase(), cbs[method])
       })
     }
   }

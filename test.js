@@ -43,3 +43,21 @@ test('register a default path', function (t) {
 
   http.get('http://localhost:' + getPort(server) + '/foo')
 })
+
+test('register multiple callbacks', function (t) {
+  t.plan(1)
+  const router = serverRouter()
+  router.on('/foo', {
+    get: function () {
+      t.pass('called')
+    }
+  })
+
+  const server = http.createServer(function (req, res) {
+    router(req, res)
+    res.end()
+    server.close()
+  }).listen()
+
+  http.get('http://localhost:' + getPort(server) + '/foo')
+})
