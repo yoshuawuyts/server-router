@@ -23,9 +23,7 @@ router.on('/:username', {
   }
 })
 
-http.createServer(function (req, res) {
-  router(req, res)
-}).listen()
+http.createServer(router).listen()
 ```
 
 ## API
