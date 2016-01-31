@@ -1,6 +1,6 @@
 {
   "name": "server-router",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Server router",
   "main": "index.js",
   "scripts": {
