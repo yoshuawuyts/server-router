@@ -61,3 +61,21 @@ test('register multiple callbacks', function (t) {
 
   http.get('http://localhost:' + getPort(server) + '/foo')
 })
+
+test('should call params', function (t) {
+  t.plan(1)
+  const router = serverRouter()
+  router.on('/:bar', {
+    get: function (params) {
+      t.equal(params.bar, 'foo', 'params are equal')
+    }
+  })
+
+  const server = http.createServer(function (req, res) {
+    router(req, res)
+    res.end()
+    server.close()
+  }).listen()
+
+  http.get('http://localhost:' + getPort(server) + '/foo')
+})

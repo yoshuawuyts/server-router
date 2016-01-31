@@ -15,11 +15,11 @@ router.on('/hello', function (req, res) {
 })
 
 router.on('/:username', {
-  get: function (req, res, ctx) {
-    res.end('username is ' + ctx.params.username)
+  get: function (req, res, params) {
+    res.end('username is ' + params.username)
   },
-  delete: function (req, res, ctx) {
-    res.end('username ' + ctx.params.username + 'will be deleted')
+  delete: function (req, res, params) {
+    res.end('username ' + params.username + 'will be deleted')
   }
 })
 
