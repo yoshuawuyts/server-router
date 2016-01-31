@@ -12,7 +12,7 @@ function serverRouter (dft) {
 
   assert.equal(typeof dft, 'string', 'dft should be a string')
 
-  const router = wayfarer(dft)
+  const router = wayfarer(dft + '/GET')
 
   match.on = on
   return match
@@ -43,6 +43,6 @@ function serverRouter (dft) {
     args.splice(0, 1)
     args[0] = req.url + '/' + req.method
 
-    return router.match.apply(null, args)
+    return router.apply(null, args)
   }
 }

@@ -22,7 +22,9 @@
     "wayfarer": "^6.1.0"
   },
   "devDependencies": {
+    "concat-stream": "^1.5.1",
     "dependency-check": "^2.5.1",
+    "get-server-port": "^1.0.0",
     "istanbul": "^0.4.1",
     "standard": "^5.4.1",
     "tape": "^4.2.2"
