@@ -14,6 +14,7 @@ function serverRouter (dft) {
 
   const router = wayfarer(dft + '/GET')
 
+  match._router = router
   match.on = on
   return match
 
