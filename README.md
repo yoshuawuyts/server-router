@@ -36,7 +36,7 @@ Attach a callback to a route. Callback can be either a function, which is
 registered as `GET` or an object containing functions, with valid HTTP methods
 as keys.
 
-### router(req, res, ...?)
+### router(req, res, params, ...?)
 Match a route on a router. Additional arguments can be passed to the matched
 function. Matched routes have a signature of `(req, res, params, ...?)`.
 
