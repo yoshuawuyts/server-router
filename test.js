@@ -14,16 +14,13 @@ test('register a single callback on GET', function (t) {
   t.plan(1)
   const router = serverRouter()
 
-  router.on('/foo', function () {
+  router.on('/foo', function (req, res) {
     t.pass('called')
-  })
-
-  const server = http.createServer(function (req, res) {
-    router(req, res)
     res.end()
     server.close()
-  }).listen()
+  })
 
+  const server = http.createServer(router).listen()
   http.get('http://localhost:' + getPort(server) + '/foo')
 })
 
@@ -31,16 +28,13 @@ test('register a default path', function (t) {
   t.plan(1)
   const router = serverRouter('/404')
 
-  router.on('/404', function () {
+  router.on('/404', function (req, res) {
     t.pass('called')
-  })
-
-  const server = http.createServer(function (req, res) {
-    router(req, res)
     res.end()
     server.close()
-  }).listen()
+  })
 
+  const server = http.createServer(router).listen()
   http.get('http://localhost:' + getPort(server) + '/foo')
 })
 
@@ -48,17 +42,14 @@ test('register multiple callbacks', function (t) {
   t.plan(1)
   const router = serverRouter()
   router.on('/foo', {
-    get: function () {
+    get: function (req, res) {
       t.pass('called')
+      res.end()
+      server.close()
     }
   })
 
-  const server = http.createServer(function (req, res) {
-    router(req, res)
-    res.end()
-    server.close()
-  }).listen()
-
+  const server = http.createServer(router).listen()
   http.get('http://localhost:' + getPort(server) + '/foo')
 })
 
@@ -66,16 +57,13 @@ test('should call params', function (t) {
   t.plan(1)
   const router = serverRouter()
   router.on('/:bar', {
-    get: function (params) {
+    get: function (req, res, params) {
       t.equal(params.bar, 'foo', 'params are equal')
+      res.end()
+      server.close()
     }
   })
 
-  const server = http.createServer(function (req, res) {
-    router(req, res)
-    res.end()
-    server.close()
-  }).listen()
-
+  const server = http.createServer(router).listen()
   http.get('http://localhost:' + getPort(server) + '/foo')
 })

@@ -15,10 +15,10 @@ router.on('/hello', function (req, res) {
 })
 
 router.on('/:username', {
-  get: function (params) {
+  get: function (req, res, params) {
     res.end('username is ' + params.username)
   },
-  delete: function (params) {
+  delete: function (req, res, params) {
     res.end('username ' + params.username + 'will be deleted')
   }
 })
@@ -38,7 +38,7 @@ as keys.
 
 ### router(req, res, ...?)
 Match a route on a router. Additional arguments can be passed to the matched
-function.
+function. Matched routes have a signature of `(req, res, params, ...?)`.
 
 ## Installation
 ```sh
