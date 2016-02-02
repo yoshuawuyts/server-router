@@ -24,8 +24,10 @@ function serverRouter (dft) {
     assert.equal(typeof route, 'string', 'route should be a string')
 
     if (typeof cbs === 'function') {
+      // register a single function as GET
       router.on(route + '/GET', wrap(cbs))
     } else {
+      // register an object of HTTP methods
       Object.keys(cbs).forEach(function (method) {
         const ok = methods.indexOf(method.toUpperCase)
         assert.ok(ok, 'method ' + method + ' is not a valid HTTP method')
@@ -33,6 +35,8 @@ function serverRouter (dft) {
       })
     }
 
+    // wrap a callback to pass arguments in different order
+    // fn -> fn
     function wrap (cb) {
       return function (params, req, res) {
         const args = sliced(arguments)
