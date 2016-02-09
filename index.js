@@ -41,7 +41,7 @@ function serverRouter (dft) {
       return function (params, req, res) {
         const args = sliced(arguments)
         args.splice(0, 3)
-        cb.apply(null, [req, res, params].concat(args))
+        return cb.apply(null, [req, res, params].concat(args))
       }
     }
   }

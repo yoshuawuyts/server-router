@@ -67,3 +67,21 @@ test('should call params', function (t) {
   const server = http.createServer(router).listen()
   http.get('http://localhost:' + getPort(server) + '/foo')
 })
+
+test('should return a value', function (t) {
+  t.plan(1)
+  const router = serverRouter()
+  router.on('/foo', {
+    get: function (req, res, params) {
+      res.end()
+      server.close()
+      return 'foo'
+    }
+  })
+
+  const server = http.createServer(function (req, res) {
+    const foo = router(req, res)
+    t.equal(foo, 'foo', 'returns a value')
+  }).listen()
+  http.get('http://localhost:' + getPort(server) + '/foo')
+})
