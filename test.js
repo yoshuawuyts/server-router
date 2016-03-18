@@ -24,6 +24,20 @@ test('register a single callback on GET', function (t) {
   http.get('http://localhost:' + getPort(server) + '/foo')
 })
 
+test('register an index path', function (t) {
+  t.plan(1)
+  const router = serverRouter()
+
+  router.on('/', function (req, res) {
+    t.pass('called')
+    res.end()
+    server.close()
+  })
+
+  const server = http.createServer(router).listen()
+  http.get('http://localhost:' + getPort(server) + '/')
+})
+
 test('register a default path', function (t) {
   t.plan(1)
   const router = serverRouter('/404')

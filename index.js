@@ -23,6 +23,7 @@ function serverRouter (dft) {
   // (str, fn|obj) -> null
   function on (route, cbs) {
     assert.equal(typeof route, 'string', 'route should be a string')
+    route = (route || '').replace(/^\//, '')
 
     if (typeof cbs === 'function') {
       // register a single function as GET
