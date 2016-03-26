@@ -2,7 +2,9 @@
 [![npm version][2]][3] [![build status][4]][5] [![test coverage][6]][7]
 [![downloads][8]][9] [![js-standard-style][10]][11]
 
-Server router.
+Server router is a fast, modular server-side router. It's tuned for performance
+by statically declaring routes in a [radix-trie][12]. Can return values which
+makes it ideal for middleware pipelines using streams.
 
 ## Usage
 ```js
@@ -26,6 +28,30 @@ router.on('/:username', {
 http.createServer(router).listen()
 ```
 
+## Usage with streams
+Server-router can return values, which makes it ideal for Node streams,
+pull-streams or other eventual values:
+```js
+const serverRouter = require('server-router')
+const fromString = require('from2-string')
+const http = require('http')
+const fs = require('fs')
+
+const router = serverRouter('/404')
+router.on('/index.html', function (req, res) {
+  return fs.createReadStream(./index.hmlt)
+})
+
+router.on('/404', function (req, res) {
+  res.statusCode = 404
+  return fromString('File not found')
+})
+
+http.createServer(function (req, res) {
+  router(req, res).pipe(res)
+}).listen()
+```
+
 ## API
 ### router = serverRouter(default)
 Create a new router with a default path. If no default path is set, the router
@@ -36,9 +62,10 @@ Attach a callback to a route. Callback can be either a function, which is
 registered as `GET` or an object containing functions, with valid HTTP methods
 as keys.
 
-### router(req, res, params, ...?)
+### value = router(req, res, params, ...?)
 Match a route on a router. Additional arguments can be passed to the matched
-function. Matched routes have a signature of `(req, res, params, ...?)`.
+function. Matched routes have a signature of `(req, res, params, ...?)`. Match
+functions can return values, which is useful to create pipelines.
 
 ## Installation
 ```sh
@@ -60,3 +87,4 @@ $ npm install server-router
 [9]: https://npmjs.org/package/server-router
 [10]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square
 [11]: https://github.com/feross/standard
+[12]: https://github.com/yoshuawuyts/wayfarer
