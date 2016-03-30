@@ -118,13 +118,16 @@ test('nest routers', function (t) {
 
 test('nest routers with partials', function (t) {
   t.plan(5)
-  const r2 = serverRouter()
+
   var check1 = false
   var check2 = false
+  const r2 = serverRouter()
+
   r2.on('/', function (req, res) {
     check1 = true
     res.end()
   })
+
   r2.on('/:sub', function (req, res, params) {
     t.equal(params.sub, 'bar', 'params match')
     check2 = true
