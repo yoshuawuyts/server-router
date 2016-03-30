@@ -106,15 +106,45 @@ test('nest routers', function (t) {
   r2.on('/bar', function (req, res) {
     res.end()
     server.close()
-    return 'foo'
+    t.pass('path called')
   })
 
   const r1 = serverRouter()
   r1.on('/foo', r2)
 
-  const server = http.createServer(function (req, res) {
-    const foo = r1(req, res)
-    t.equal(foo, 'foo', 'returns a value')
-  }).listen()
+  const server = http.createServer(r1).listen()
   http.get('http://localhost:' + getPort(server) + '/foo/bar')
+})
+
+test('nest routers with partials', function (t) {
+  t.plan(5)
+  const r2 = serverRouter()
+  var check1 = false
+  var check2 = false
+  r2.on('/', function (req, res) {
+    check1 = true
+    res.end()
+  })
+  r2.on('/:sub', function (req, res, params) {
+    t.equal(params.sub, 'bar', 'params match')
+    check2 = true
+    res.end()
+  })
+
+  const r1 = serverRouter()
+  r1.on('/foo', r2)
+
+  const server = http.createServer(r1).listen()
+  const url1 = 'http://localhost:' + getPort(server) + '/foo'
+  http.get(url1, function (res) {
+    t.equal(res.statusCode, 200, 'status ok')
+    t.equal(check1, true, 'first path was called')
+
+    const url2 = 'http://localhost:' + getPort(server) + '/foo/bar'
+    http.get(url2, function (res) {
+      t.equal(res.statusCode, 200, 'status ok')
+      t.equal(check2, true, 'second path was called')
+      server.close()
+    })
+  })
 })
