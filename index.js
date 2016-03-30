@@ -25,7 +25,9 @@ function serverRouter (dft) {
     assert.equal(typeof route, 'string', 'route should be a string')
     route = (route || '').replace(/^\//, '')
 
-    if (typeof cbs === 'function') {
+    if (cbs && cbs._router) {
+      router.on(route, cbs._router)
+    } else if (typeof cbs === 'function') {
       // register a single function as GET
       router.on(route + '/GET', wrap(cbs))
     } else {

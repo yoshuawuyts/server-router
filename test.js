@@ -99,3 +99,22 @@ test('should return a value', function (t) {
   }).listen()
   http.get('http://localhost:' + getPort(server) + '/foo')
 })
+
+test('nest routers', function (t) {
+  t.plan(1)
+  const r2 = serverRouter()
+  r2.on('/bar', function (req, res) {
+    res.end()
+    server.close()
+    return 'foo'
+  })
+
+  const r1 = serverRouter()
+  r1.on('/foo', r2)
+
+  const server = http.createServer(function (req, res) {
+    const foo = r1(req, res)
+    t.equal(foo, 'foo', 'returns a value')
+  }).listen()
+  http.get('http://localhost:' + getPort(server) + '/foo/bar')
+})
