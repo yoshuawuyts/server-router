@@ -1,4 +1,5 @@
 const pathname = require('pathname-match')
+const urlencode = require('urlencode')
 const wayfarer = require('wayfarer')
 const methods = require('methods')
 const assert = require('assert')
@@ -54,7 +55,7 @@ function serverRouter (dft) {
   // [any?] -> any
   function match (req, res) {
     const args = sliced(arguments)
-    args.unshift(pathname(req.url) + '/' + req.method)
+    args.unshift(urlencode.decode(pathname(req.url)) + '/' + req.method)
     return router.apply(null, args)
   }
 }

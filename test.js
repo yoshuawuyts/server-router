@@ -100,6 +100,19 @@ test('should return a value', function (t) {
   http.get('http://localhost:' + getPort(server) + '/foo')
 })
 
+test('should handle encoded characters', function (t) {
+  t.plan(1)
+  const router = serverRouter()
+  router.on('/foo bar', function (req, res, params) {
+    t.pass('thing called')
+    res.end()
+    server.close()
+  })
+
+  const server = http.createServer(router).listen()
+  http.get('http://localhost:' + getPort(server) + '/foo%20bar')
+})
+
 test('nest routers', function (t) {
   t.plan(1)
   const r2 = serverRouter()
