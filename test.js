@@ -6,7 +6,7 @@ const serverRouter = require('./')
 
 test('should assert input types', function (t) {
   t.plan(2)
-  t.throws(serverRouter.bind(null, {}))
+  t.throws(serverRouter.bind(null, 1235))
   t.doesNotThrow(serverRouter.bind(null))
 })
 
@@ -163,4 +163,28 @@ test('nest routers with partials', function (t) {
       server.close()
     })
   })
+})
+
+test('wrap paths', function (t) {
+  t.plan(2)
+
+  const r = serverRouter({ wrap: wrapFunction() })
+  r.on('/foo', {
+    handler: function (req, res, params) {
+      t.pass('handler called')
+      res.end()
+    }
+  })
+
+  const server = http.createServer(r).listen()
+  http.get('http://localhost:' + getPort(server) + '/foo', function (res) {
+    server.close()
+  })
+
+  function wrapFunction () {
+    t.pass('wrapper called')
+    return function (data) {
+      return data.handler
+    }
+  }
 })

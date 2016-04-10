@@ -9,10 +9,17 @@ module.exports = serverRouter
 
 // Server router
 // str -> fn -> any
-function serverRouter (dft) {
+function serverRouter (dft, opts) {
+  if (typeof dft === 'object') {
+    opts = dft
+    dft = ''
+  }
+
   dft = dft || ''
+  opts = opts || {}
 
   assert.equal(typeof dft, 'string', 'dft should be a string')
+  assert.equal(typeof opts, 'object', 'opts should be an object')
 
   const router = wayfarer(dft + '/GET')
 
@@ -26,12 +33,15 @@ function serverRouter (dft) {
     assert.equal(typeof route, 'string', 'route should be a string')
     route = (route || '').replace(/^\//, '')
 
+    // allow wrapping for custom intrumentation
+    if (opts.wrap) cbs = opts.wrap(cbs)
+
     if (cbs && cbs._router) {
       router.on(route, cbs._router)
     } else if (typeof cbs === 'function') {
       // register a single function as GET
       router.on(route + '/GET', wrap(cbs))
-    } else {
+    } else if (typeof cbs === 'object') {
       // register an object of HTTP methods
       Object.keys(cbs).forEach(function (method) {
         const ok = methods.indexOf(method.toUpperCase)
