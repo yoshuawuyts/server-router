@@ -84,10 +84,42 @@ separate files, but at the top level it's clear which routes are handled by
 which handlers. Server-router supports arbitrary nesting, so go ahead and
 structure your files exactly as you like.
 
+## Custom frontends
+When building real-world applications, it's common to perform actions such as
+validation of data, validation of headers and more. To do this it can be useful
+to wrap routes in a custom function that performs these actions. Here's an
+example using `api-gateway`:
+```js
+const serverRouter = require('server-router')
+const apiGateway = require('api-gateway')
+const http = require('http')
+
+const gateway = apiGateway()
+const router = createRouter('/404', { wrap: gateway })
+router.on('/', {
+  get: {
+    description: 'Returns the API index page',
+    accepts: [ 'application/json' ],
+    responds: [ 'application/json' ],
+    handler: function (req, res, params) {}
+  }
+})
+
+router.on('/foo', {
+  description: 'Returns the foo endpoint',
+  handler: function (req, res, params) {}
+})
+
+http.createServer(router).listen()
+```
+
 ## API
-### router = serverRouter(default)
+### router = serverRouter(default, options)
 Create a new router with a default path. If no default path is set, the router
-will crash if an unknown path is encountered.
+will crash if an unknown path is encountered. Options is an object with the
+following options:
+- __wrap:__ provide a custom frontend wrapper to perform common actions. See
+  [custom-frontends](#custom-frontends) for a usage example.
 
 ### router.on(route, callback|obj)
 Attach a callback to a route. Callback can be either a function, which is
@@ -103,6 +135,14 @@ functions can return values, which is useful to create pipelines.
 ```sh
 $ npm install server-router
 ```
+
+## See Also
+- [wayfarer](https://github.com/yoshuawuyts/wayfarer) - vanilla radix-trie
+  router
+- [sheet-router](https://github.com/yoshuawuyts/sheet-router) - client-side
+  radix-trie router
+- [server-gateway](https://github.com/yoshuawuyts/server-gateway) - server
+  middleware collection
 
 ## License
 [MIT](https://tldrlegal.com/license/mit-license)
