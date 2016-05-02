@@ -28,7 +28,7 @@
     "dependency-check": "^2.5.1",
     "get-server-port": "^1.0.0",
     "istanbul": "^0.4.1",
-    "standard": "^6.0.8",
+    "standard": "^7.0.0",
     "tape": "^4.2.2"
   },
   "files": [
