@@ -39,7 +39,7 @@ const fs = require('fs')
 
 const router = serverRouter('/404')
 router.on('/index.html', function (req, res) {
-  return fs.createReadStream(./index.hmlt)
+  return fs.createReadStream('./index.html')
 })
 
 router.on('/404', function (req, res) {
