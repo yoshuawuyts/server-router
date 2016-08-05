@@ -11,7 +11,7 @@ makes it ideal for middleware pipelines using streams.
 const serverRouter = require('server-router')
 const http = require('http')
 
-const router = serverRouter('/404')
+const router = serverRouter()
 router.on('/hello', function (req, res) {
   res.end('hello world')
 })
