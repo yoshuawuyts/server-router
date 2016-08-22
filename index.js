@@ -3,69 +3,89 @@ const urlencode = require('urlencode')
 const wayfarer = require('wayfarer')
 const methods = require('methods')
 const assert = require('assert')
-const sliced = require('sliced')
 
 module.exports = serverRouter
 
 // Server router
 // str -> fn -> any
-function serverRouter (dft, opts) {
-  if (typeof dft === 'object') {
-    opts = dft
-    dft = ''
+function serverRouter (dft, routes) {
+  if (Array.isArray(dft)) {
+    routes = dft
+    dft = '/404'
   }
 
-  dft = dft || ''
-  opts = opts || {}
-
-  assert.equal(typeof dft, 'string', 'dft should be a string')
-  assert.equal(typeof opts, 'object', 'opts should be an object')
+  assert.equal(typeof dft, 'string', 'server-router: dft should be a string')
+  assert.ok(Array.isArray(routes), 'server-router: routes should be an array')
 
   const router = wayfarer(dft + '/GET')
-
   match._router = router
-  match.on = on
-  return match
 
-  // register a route on the router
-  // (str, fn|obj) -> null
-  function on (route, cbs) {
-    assert.equal(typeof route, 'string', 'route should be a string')
-    route = (route || '').replace(/^\//, '')
+  // register tree in router
+  // tree[0] is a string, thus a route
+  // tree[0] is an array, thus not a route
+  // tree[1] is a function or object
+    // tree[2] is an array
+    // tree[2] is not an array
+  // tree[1] is an array
+  ;(function walk (tree, fullRoute) {
+    if (typeof tree[0] === 'string') {
+      var route = tree[0].replace(/^\//, '')
+    } else {
+      var rootArr = tree[0]
+    }
 
-    // allow wrapping for custom intrumentation
-    if (opts.wrap) cbs = opts.wrap(cbs)
+    const children = (Array.isArray(tree[1]))
+      ? tree[1]
+      : Array.isArray(tree[2]) ? tree[2] : null
 
-    if (cbs && cbs._router) {
-      router.on(route, cbs._router)
-    } else if (typeof cbs === 'function') {
-      // register a single function as GET
-      router.on(route + '/GET', wrap(cbs))
-    } else if (typeof cbs === 'object') {
-      // register an object of HTTP methods
-      Object.keys(cbs).forEach(function (method) {
-        const ok = methods.indexOf(method.toUpperCase)
-        assert.ok(ok, 'method ' + method + ' is not a valid HTTP method')
-        router.on(route + '/' + method.toUpperCase(), wrap(cbs[method]))
+    if (rootArr) {
+      tree.forEach(function (node) {
+        walk(node, fullRoute)
       })
     }
 
-    // wrap a callback to pass arguments in different order
-    // fn -> fn
-    function wrap (cb) {
-      return function (params, req, res) {
-        const args = sliced(arguments)
-        args.splice(0, 3)
-        return cb.apply(null, [req, res, params].concat(args))
-      }
+    const cb = (typeof tree[1] === 'function')
+      ? tree[1]
+      : (typeof tree[1] === 'object')
+        ? tree[1]
+        : null
+
+    if (cb && typeof cb === 'function') {
+      const computedRoute = route
+        ? fullRoute.concat(route).join('/')
+        : fullRoute.length ? fullRoute.join('/') : route
+
+      router.on(`${computedRoute}/GET`, _wrap(cb))
+    } else if (cb && typeof cb === 'object') {
+      Object.keys(cb).forEach(function (method) {
+        const meth = method.toUpperCase()
+        const ok = methods.indexOf(meth)
+        assert.ok(ok, `server-router: ${method} is not a valid HTTP method`)
+        const computedRoute = route
+          ? fullRoute.concat(route).join('/')
+          : fullRoute.length ? fullRoute.join('/') : route
+
+        router.on(`${computedRoute}/${meth}`, _wrap(cb[method]))
+      })
     }
+
+    if (Array.isArray(children)) {
+      walk(children, fullRoute.concat(route))
+    }
+  })(routes, [])
+
+  return match
+
+  // wrap a callback to swap arguments
+  // fn -> (obj, obj, obj) => null
+  function _wrap (cb) {
+    return (params, req, res) => cb(req, res, params)
   }
 
   // match a route
-  // [any?] -> any
-  function match (req, res) {
-    const args = sliced(arguments)
-    args.unshift(urlencode.decode(pathname(req.url)) + '/' + req.method)
-    return router.apply(null, args)
+  // (obj, obj, [any..]) -> any
+  function match (req, res, arg1, arg2, arg3, arg4) {
+    const uri = urlencode.decode(pathname(req.url)) + '/' + req.method
+    return router(uri, req, res, arg1, arg2, arg3, arg4)
   }
 }
