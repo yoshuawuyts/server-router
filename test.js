@@ -1,190 +1,116 @@
 const getPort = require('get-server-port')
-const test = require('tape')
+const tape = require('tape')
 const http = require('http')
 
 const serverRouter = require('./')
 
-test('should assert input types', function (t) {
-  t.plan(2)
-  t.throws(serverRouter.bind(null, 1235))
-  t.doesNotThrow(serverRouter.bind(null))
-})
-
-test('register a single callback on GET', function (t) {
-  t.plan(1)
-  const router = serverRouter()
-
-  router.on('/foo', function (req, res) {
-    t.pass('called')
-    res.end()
-    server.close()
+tape('server-router', (t) => {
+  t.test('should assert input types', (t) => {
+    t.plan(2)
+    t.throws(serverRouter.bind(null, 1235), /string/)
+    t.throws(serverRouter.bind(null, 'hello'), /array/)
   })
 
-  const server = http.createServer(router).listen()
-  http.get('http://localhost:' + getPort(server) + '/foo')
-})
+  t.test('should register a single callback on GET', (t) => {
+    t.plan(1)
+    const router = serverRouter([
+      ['/foo', (req, res, params) => {
+        t.pass('called')
+        res.end()
+        server.close()
+      }]
+    ])
 
-test('register an index path', function (t) {
-  t.plan(1)
-  const router = serverRouter()
-
-  router.on('/', function (req, res) {
-    t.pass('called')
-    res.end()
-    server.close()
+    const server = http.createServer(router).listen()
+    http.get(`http://localhost:${getPort(server)}/foo`)
   })
 
-  const server = http.createServer(router).listen()
-  http.get('http://localhost:' + getPort(server) + '/')
-})
+  t.test('should register an index path', (t) => {
+    t.plan(1)
+    const router = serverRouter([
+      ['/', (req, res, params) => {
+        t.pass('called')
+        res.end()
+        server.close()
+      }]
+    ])
 
-test('register a default path', function (t) {
-  t.plan(1)
-  const router = serverRouter('/404')
-
-  router.on('/404', function (req, res) {
-    t.pass('called')
-    res.end()
-    server.close()
+    const server = http.createServer(router).listen()
+    http.get(`http://localhost:${getPort(server)}`)
   })
 
-  const server = http.createServer(router).listen()
-  http.get('http://localhost:' + getPort(server) + '/foo')
-})
+  t.test('should register a default path', (t) => {
+    t.plan(1)
+    const router = serverRouter('/hey', [
+      ['/hey', (req, res, params) => {
+        t.pass('called')
+        res.end()
+        server.close()
+      }]
+    ])
 
-test('register multiple callbacks', function (t) {
-  t.plan(1)
-  const router = serverRouter()
-  router.on('/foo', {
-    get: function (req, res) {
-      t.pass('called')
-      res.end()
-      server.close()
-    }
+    const server = http.createServer(router).listen()
+    http.get(`http://localhost:${getPort(server)}/bar`)
   })
 
-  const server = http.createServer(router).listen()
-  http.get('http://localhost:' + getPort(server) + '/foo')
-})
+  t.test('should register named callbacks', (t) => {
+    t.plan(1)
+    const router = serverRouter([
+      ['/bar', {
+        get: (req, res, params) => {
+          t.pass('called')
+          res.end()
+          server.close()
+        }
+      }]
+    ])
 
-test('should call params', function (t) {
-  t.plan(1)
-  const router = serverRouter()
-  router.on('/:bar', {
-    get: function (req, res, params) {
-      t.equal(params.bar, 'foo', 'params are equal')
-      res.end()
-      server.close()
-    }
+    const server = http.createServer(router).listen()
+    http.get(`http://localhost:${getPort(server)}/bar`)
   })
 
-  const server = http.createServer(router).listen()
-  http.get('http://localhost:' + getPort(server) + '/foo')
-})
+  t.test('should call params', (t) => {
+    t.plan(1)
+    const router = serverRouter([
+      ['/:bar', (req, res, params) => {
+        t.equal(params.bar, 'foo', 'params are equal')
+        res.end()
+        server.close()
+      }]
+    ])
 
-test('should return a value', function (t) {
-  t.plan(1)
-  const router = serverRouter()
-  router.on('/foo', {
-    get: function (req, res, params) {
-      res.end()
-      server.close()
-      return 'foo'
-    }
+    const server = http.createServer(router).listen()
+    http.get(`http://localhost:${getPort(server)}/foo`)
   })
 
-  const server = http.createServer(function (req, res) {
-    const foo = router(req, res)
-    t.equal(foo, 'foo', 'returns a value')
-  }).listen()
-  http.get('http://localhost:' + getPort(server) + '/foo')
-})
+  t.test('should return a value', (t) => {
+    t.plan(1)
+    const router = serverRouter([
+      ['/foo', (req, res, params) => {
+        res.end()
+        server.close()
+        return 'foo'
+      }]
+    ])
 
-test('should handle encoded characters', function (t) {
-  t.plan(1)
-  const router = serverRouter()
-  router.on('/foo bar', function (req, res, params) {
-    t.pass('thing called')
-    res.end()
-    server.close()
+    const server = http.createServer((req, res) => {
+      const ret = router(req, res)
+      t.equal(ret, 'foo', 'returns a value')
+    }).listen()
+    http.get(`http://localhost:${getPort(server)}/foo`)
   })
 
-  const server = http.createServer(router).listen()
-  http.get('http://localhost:' + getPort(server) + '/foo%20bar')
-})
+  t.test('should handle encoded characters', (t) => {
+    t.plan(1)
+    const router = serverRouter([
+      ['/foo bar', (req, res, params) => {
+        t.pass('called')
+        res.end()
+        server.close()
+      }]
+    ])
 
-test('nest routers', function (t) {
-  t.plan(1)
-  const r2 = serverRouter()
-  r2.on('/bar', function (req, res) {
-    res.end()
-    server.close()
-    t.pass('path called')
+    const server = http.createServer(router).listen()
+    http.get(`http://localhost:${getPort(server)}/foo%20bar`)
   })
-
-  const r1 = serverRouter()
-  r1.on('/foo', r2)
-
-  const server = http.createServer(r1).listen()
-  http.get('http://localhost:' + getPort(server) + '/foo/bar')
-})
-
-test('nest routers with partials', function (t) {
-  t.plan(5)
-
-  var check1 = false
-  var check2 = false
-  const r2 = serverRouter()
-
-  r2.on('/', function (req, res) {
-    check1 = true
-    res.end()
-  })
-
-  r2.on('/:sub', function (req, res, params) {
-    t.equal(params.sub, 'bar', 'params match')
-    check2 = true
-    res.end()
-  })
-
-  const r1 = serverRouter()
-  r1.on('/foo', r2)
-
-  const server = http.createServer(r1).listen()
-  const url1 = 'http://localhost:' + getPort(server) + '/foo'
-  http.get(url1, function (res) {
-    t.equal(res.statusCode, 200, 'status ok')
-    t.equal(check1, true, 'first path was called')
-
-    const url2 = 'http://localhost:' + getPort(server) + '/foo/bar'
-    http.get(url2, function (res) {
-      t.equal(res.statusCode, 200, 'status ok')
-      t.equal(check2, true, 'second path was called')
-      server.close()
-    })
-  })
-})
-
-test('wrap paths', function (t) {
-  t.plan(2)
-
-  const r = serverRouter({ wrap: wrapFunction() })
-  r.on('/foo', {
-    handler: function (req, res, params) {
-      t.pass('handler called')
-      res.end()
-    }
-  })
-
-  const server = http.createServer(r).listen()
-  http.get('http://localhost:' + getPort(server) + '/foo', function (res) {
-    server.close()
-  })
-
-  function wrapFunction () {
-    t.pass('wrapper called')
-    return function (data) {
-      return data.handler
-    }
-  }
 })
