@@ -12,8 +12,8 @@ const http = require('http')
 const router = serverRouter([
   ['/hello', (req, res) => res.end('hello world')],
   ['/:username', {
-    get: (req, res, params) => res.end(`username is ${params.username}`)],
-    delete: (req, res, params) => res.end(`${params.username} was deleted`)]
+    get: (req, res, params) => res.end(`username is ${params.username}`),
+    delete: (req, res, params) => res.end(`${params.username} was deleted`)
   }]
 ])
 
