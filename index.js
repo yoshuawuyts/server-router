@@ -15,7 +15,7 @@ function serverRouter (opts, routes) {
   }
 
   const dft = opts.default || '/404'
-  const shouldThunk = opts.thunk || true
+  const shouldThunk = (opts.thunk || opts.thunk === undefined) || false
 
   assert.equal(typeof opts, 'object', 'server-router: opts should be a object')
   assert.equal(typeof dft, 'string', 'server-router: opts.default should be a string')
