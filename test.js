@@ -7,14 +7,14 @@ const serverRouter = require('./')
 tape('server-router', (t) => {
   t.test('should assert input types', (t) => {
     t.plan(2)
-    t.throws(serverRouter.bind(null, 1235), /string/)
+    t.throws(serverRouter.bind(null, 1235), /array/)
     t.throws(serverRouter.bind(null, 'hello'), /array/)
   })
 
   t.test('should register a single callback on GET', (t) => {
     t.plan(1)
     const router = serverRouter([
-      ['/foo', (req, res, params) => {
+      ['/foo', function (req, res, params) {
         t.pass('called')
         res.end()
         server.close()
@@ -41,7 +41,7 @@ tape('server-router', (t) => {
 
   t.test('should register a default path', (t) => {
     t.plan(1)
-    const router = serverRouter('/hey', [
+    const router = serverRouter({ default: '/hey' }, [
       ['/hey', (req, res, params) => {
         t.pass('called')
         res.end()

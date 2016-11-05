@@ -15,9 +15,10 @@ function serverRouter (opts, routes) {
   }
 
   const dft = opts.default || '/404'
-  const shouldThunk = opts.thunk
+  const shouldThunk = opts.thunk || true
 
-  assert.equal(typeof dft, 'string', 'server-router: dft should be a string')
+  assert.equal(typeof opts, 'object', 'server-router: opts should be a object')
+  assert.equal(typeof dft, 'string', 'server-router: opts.default should be a string')
   assert.ok(Array.isArray(routes), 'server-router: routes should be an array')
 
   const router = wayfarer(dft + '/GET')
