@@ -8,13 +8,17 @@ module.exports = serverRouter
 
 // Server router
 // str -> fn -> any
-function serverRouter (dft, routes) {
-  if (Array.isArray(dft)) {
-    routes = dft
-    dft = '/404'
+function serverRouter (opts, routes) {
+  if (!routes) {
+    routes = opts
+    opts = {}
   }
 
-  assert.equal(typeof dft, 'string', 'server-router: dft should be a string')
+  const dft = opts.default || '/404'
+  const shouldThunk = opts.thunk || true
+
+  assert.equal(typeof opts, 'object', 'server-router: opts should be a object')
+  assert.equal(typeof dft, 'string', 'server-router: opts.default should be a string')
   assert.ok(Array.isArray(routes), 'server-router: routes should be an array')
 
   const router = wayfarer(dft + '/GET')
@@ -55,17 +59,18 @@ function serverRouter (dft, routes) {
         ? fullRoute.concat(route).join('/')
         : fullRoute.length ? fullRoute.join('/') : route
 
-      router.on(`${computedRoute}/GET`, _wrap(cb))
-    } else if (cb && typeof cb === 'object') {
+      const handler = (shouldThunk) ? thunkify(cb) : cb
+      router.on(`${computedRoute}/GET`, handler)
+    } else if (cb && typeof cb === 'object' && !Array.isArray(cb)) {
       Object.keys(cb).forEach(function (method) {
-        const meth = method.toUpperCase()
-        const ok = methods.indexOf(meth)
-        assert.ok(ok, `server-router: ${method} is not a valid HTTP method`)
+        assert.ok(methods.indexOf(method.toUpperCase()), `server-router: ${method} is not a valid HTTP method`)
+
         const computedRoute = route
           ? fullRoute.concat(route).join('/')
           : fullRoute.length ? fullRoute.join('/') : route
 
-        router.on(`${computedRoute}/${meth}`, _wrap(cb[method]))
+        const handler = (shouldThunk) ? thunkify(cb[method]) : cb[method]
+        router.on(`${computedRoute}/${method.toUpperCase()}`, handler)
       })
     }
 
@@ -78,7 +83,7 @@ function serverRouter (dft, routes) {
 
   // wrap a callback to swap arguments
   // fn -> (obj, obj, obj) => null
-  function _wrap (cb) {
+  function thunkify (cb) {
     return (params, req, res) => cb(req, res, params)
   }
 

@@ -38,9 +38,14 @@ http.createServer((req, res) => router(req, res).pipe(res)).listen()
 ```
 
 ## API
-### router = serverRouter(default, routes)
-Create a new router with a default path. If no default path is set, the router
-will crash if an unknown path is encountered.
+### router = serverRouter(opts, routes)
+Create a new router with opts:
+- __default:__ (default: `'/404'`) Path to default to when a route is not
+  matched. If no default path is set, the router will crash when an unknown
+  path is encountered.
+- __thunk:__ (default: `true`) Change the way callbacks are wrapped internally.
+  Unless you're wrapping `sheet-router` with some custom logic you probably
+  don't want to call this.
 
 ### value = router(req, res, params, ...?)
 Match a route on a router. Additional arguments can be passed to the matched
