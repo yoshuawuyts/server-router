@@ -1,5 +1,5 @@
-const walk = require('wayfarer/walk')
-const assert = require('assert')
+var walk = require('wayfarer/walk')
+var assert = require('assert')
 
 module.exports = walkServerRouter
 
