@@ -2,7 +2,8 @@
 [![npm version][2]][3] [![build status][4]][5] [![test coverage][6]][7]
 [![downloads][8]][9] [![js-standard-style][10]][11]
 
-Performant radix-trie router for streaming servers.
+Performant [radix-trie](https://en.wikipedia.org/wiki/Radix_tree) router for
+streaming servers.
 
 ## Usage
 ```js
