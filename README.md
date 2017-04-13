@@ -2,55 +2,40 @@
 [![npm version][2]][3] [![build status][4]][5] [![test coverage][6]][7]
 [![downloads][8]][9] [![js-standard-style][10]][11]
 
-Fast lisp-like router for streaming servers.
+Performant radix-trie router for streaming servers.
 
 ## Usage
 ```js
-const serverRouter = require('server-router')
-const http = require('http')
+var serverRouter = require('server-router')
+var http = require('http')
 
-const router = serverRouter([
-  ['/hello', (req, res) => res.end('hello world')],
-  ['/:username', {
-    get: (req, res, params) => res.end(`username is ${params.username}`),
-    delete: (req, res, params) => res.end(`${params.username} was deleted`)
-  }]
-])
+var router = serverRouter()
 
-http.createServer(router).listen()
-```
+router.route('GET', '/hello', function (req, res, ctx) {
+  res.end('hello world')
+})
 
-## Usage with streams
-Server-router can return values, which makes it ideal for Node streams,
-pull-streams or other eventual values:
-```js
-const serverRouter = require('server-router')
-const fromString = require('from2-string')
-const http = require('http')
-const fs = require('fs')
+router.route('PUT', '/hello/:name', function (req, res, ctx) {
+  res.end('hi there ' + ctx.params.name)
+})
 
-const router = serverRouter([
-  ['/index.html', (req, res) => fs.createReadStream('./index.html')],
-  ['/404', (req, res) => fromString('404: file not found')]
-])
-
-http.createServer((req, res) => router(req, res).pipe(res)).listen()
+http.createServer(router.start()).listen()
 ```
 
 ## API
-### router = serverRouter(opts, routes)
+### router = serverRouter(opts)
 Create a new router with opts:
 - __default:__ (default: `'/404'`) Path to default to when a route is not
   matched. If no default path is set, the router will crash when an unknown
   path is encountered.
-- __thunk:__ (default: `true`) Change the way callbacks are wrapped internally.
-  Unless you're wrapping `sheet-router` with some custom logic you probably
-  don't want to call this.
 
-### value = router(req, res, params, ...?)
-Match a route on a router. Additional arguments can be passed to the matched
-function. Matched routes have a signature of `(req, res, params, ...?)`. Match
-functions can return values, which is useful to create pipelines.
+### router.route(function(req, res, ctx))
+Register a new route. `ctx` is an object with `.params` property that contains
+any params. It's safe to extend `ctx` with other values for the duration of the
+request.
+
+### router.match(req, res)
+Match a route on a router.
 
 ## Installation
 ```sh
@@ -60,7 +45,7 @@ $ npm install server-router
 ## See Also
 - [wayfarer](https://github.com/yoshuawuyts/wayfarer) - vanilla radix-trie
   router
-- [sheet-router](https://github.com/yoshuawuyts/sheet-router) - client-side
+- [nanorouter](https://github.com/yoshuawuyts/nanorouter) - client-side
   radix-trie router
 
 ## License
