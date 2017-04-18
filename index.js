@@ -31,3 +31,10 @@ ServerRouter.prototype.match = function (req, res) {
   uri = req.method + uri
   return this._router(uri, req, res)
 }
+
+ServerRouter.prototype.start = function () {
+  var self = this
+  return function (req, res) {
+    self.match(req, res)
+  }
+}

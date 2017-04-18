@@ -92,4 +92,19 @@ tape('server-router', function (t) {
       router.match(req, res)
     }
   })
+
+  t.test('should handle routes when calling start', function (t) {
+    t.plan(1)
+
+    var router = serverRouter()
+
+    router.route('GET', '/hello', function (req, res, ctx) {
+      t.pass('/hello called')
+      res.end()
+      server.close()
+    })
+
+    var server = http.createServer(router.start()).listen()
+    http.get(`http://localhost:${getPort(server)}/hello`)
+  })
 })
