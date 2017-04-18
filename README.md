@@ -38,6 +38,10 @@ request.
 ### router.match(req, res)
 Match a route on a router.
 
+### handler = router.start()
+Return a function that can be passed directly to `http.createServer()` and
+calls `router.match()`.
+
 ## Installation
 ```sh
 $ npm install server-router
