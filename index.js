@@ -19,9 +19,13 @@ ServerRouter.prototype.route = function (method, route, handler) {
   assert.equal(typeof method, 'string', 'server-router.route: method should be type string')
   assert.equal(typeof route, 'string', 'server-router.route: route should be type string')
   assert.equal(typeof handler, 'function', 'server-router.route: handler should be type function')
+  var _route = route
   route = method.toUpperCase() + '/' + route.replace(/^[#/]/, '')
   this._router.on(route, function (params, req, res) {
-    var ctx = { params: params }
+    var ctx = {
+      params: params,
+      route: _route
+    }
     handler(req, res, ctx)
   })
 }

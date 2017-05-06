@@ -107,4 +107,18 @@ tape('server-router', function (t) {
     var server = http.createServer(router.start()).listen()
     http.get(`http://localhost:${getPort(server)}/hello`)
   })
+
+  t.test('should expose params.route', function (t) {
+    t.plan(1)
+    var router = serverRouter()
+
+    router.route('GET', '/hello/:bar', function (req, res, ctx) {
+      t.equal(ctx.route, '/hello/:bar', 'correct route')
+      res.end()
+      server.close()
+    })
+
+    var server = http.createServer(router.start()).listen()
+    http.get(`http://localhost:${getPort(server)}/hello/yo`)
+  })
 })
