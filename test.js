@@ -107,4 +107,30 @@ tape('server-router', function (t) {
     var server = http.createServer(router.start()).listen()
     http.get(`http://localhost:${getPort(server)}/hello`)
   })
+
+  t.test('should handle \'*\' method', function (t) {
+    t.plan(5)
+
+    var router = serverRouter()
+    router.route('*', '/foo', function (req, res, ctx) {
+      t.pass(req.method + ' called')
+      res.end()
+    })
+
+    var server = http.createServer(handler).listen()
+    http.request({ port: getPort(server), method: 'GET', path: '/foo' }, function () {
+      http.request({ port: getPort(server), method: 'POST', path: '/foo' }, function () {
+        http.request({ port: getPort(server), method: 'PUT', path: '/foo' }, function () {
+          http.request({ port: getPort(server), method: 'DELETE', path: '/foo' }, function () {
+            http.request({ port: getPort(server), method: 'PATCH', path: '/foo' }, function () {
+              server.close()
+            })
+          })
+        })
+      })
+    })
+    function handler (req, res) {
+      router.match(req, res)
+    }
+  })
 })
