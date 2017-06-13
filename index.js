@@ -19,11 +19,24 @@ ServerRouter.prototype.route = function (method, route, handler) {
   assert.equal(typeof method, 'string', 'server-router.route: method should be type string')
   assert.equal(typeof route, 'string', 'server-router.route: route should be type string')
   assert.equal(typeof handler, 'function', 'server-router.route: handler should be type function')
-  route = method.toUpperCase() + '/' + route.replace(/^[#/]/, '')
-  this._router.on(route, function (params, req, res) {
-    var ctx = { params: params }
-    handler(req, res, ctx)
-  })
+
+  if (method === '*') {
+    var methods = ['DELETE', 'GET', 'PATCH', 'POST', 'PUT']
+    var methodRoute = null
+    for (var i = 0; i < methods.length; i++) {
+      methodRoute = methods[i] + '/' + route.replace(/^[#/]/, '')
+      this._router.on(methodRoute, function (params, req, res) {
+        var ctx = { params: params }
+        handler(req, res, ctx)
+      })
+    }
+  } else {
+    route = method.toUpperCase() + '/' + route.replace(/^[#/]/, '')
+    this._router.on(route, function (params, req, res) {
+      var ctx = { params: params }
+      handler(req, res, ctx)
+    })
+  }
 }
 
 ServerRouter.prototype.match = function (req, res) {
