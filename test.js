@@ -112,7 +112,7 @@ tape('server-router', function (t) {
     t.plan(5)
 
     var router = serverRouter()
-    router.route('*', '/foo', function (req, res, ctx) {
+    router.route(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/foo', function (req, res, ctx) {
       t.pass(req.method + ' called')
       res.end()
     })
