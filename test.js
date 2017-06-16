@@ -107,4 +107,43 @@ tape('server-router', function (t) {
     var server = http.createServer(router.start()).listen()
     http.get(`http://localhost:${getPort(server)}/hello`)
   })
+
+  t.test('should handle an array of methods', function (t) {
+    t.plan(5)
+
+    var router = serverRouter()
+    router.route(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/foo', function (req, res, ctx) {
+      t.pass(req.method + ' called')
+      res.end()
+    })
+
+    var server = http.createServer(handler).listen()
+    makeRequest('GET', '/foo', function () {
+      makeRequest('POST', '/foo', function () {
+        makeRequest('PUT', '/foo', function () {
+          makeRequest('DELETE', '/foo', function () {
+            makeRequest('PATCH', '/foo')
+          })
+        })
+      })
+    })
+
+    function makeRequest (method, route, cb) {
+      var req = http.request({ port: getPort(server), method: method, path: route }, function (res) {
+        res.on('error', function (err) {
+          t.error(err)
+        })
+      })
+      req.on('error', function (err) {
+        t.error(err)
+      })
+      req.end(function () {
+        if (cb) cb()
+        else server.close()
+      })
+    }
+    function handler (req, res) {
+      router.match(req, res)
+    }
+  })
 })
