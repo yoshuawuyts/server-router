@@ -108,7 +108,7 @@ tape('server-router', function (t) {
     http.get(`http://localhost:${getPort(server)}/hello`)
   })
 
-  t.test('should handle \'*\' method', function (t) {
+  t.test('should handle an array of methods', function (t) {
     t.plan(5)
 
     var router = serverRouter()
