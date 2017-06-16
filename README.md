@@ -30,10 +30,11 @@ Create a new router with opts:
   matched. If no default path is set, the router will crash when an unknown
   path is encountered.
 
-### router.route(function(req, res, ctx))
-Register a new route. `ctx` is an object with `.params` property that contains
-any params. It's safe to extend `ctx` with other values for the duration of the
-request.
+### router.route(method|routes, route, function(req, res, ctx))
+Register a new route with an HTTP method name and a routename. Can register
+multiple handlers by passing an array of method names. `ctx` is an object with
+`.params` property that contains any params. It's safe to extend `ctx` with
+other values for the duration of the request.
 
 ### router.match(req, res)
 Match a route on a router.
