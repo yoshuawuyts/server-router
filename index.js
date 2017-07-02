@@ -10,9 +10,7 @@ function ServerRouter (opts) {
 
   opts = opts || {}
   assert.equal(typeof opts, 'object', 'server-router: opts should be type object')
-  this._default = opts.default || '/404'
-  assert.equal(typeof this._default, 'string', 'server-router: this._default should be type string')
-  this._router = wayfarer('/GET/' + this._default.replace(/^[#/]/, ''))
+  this._router = wayfarer()
 }
 
 ServerRouter.prototype.route = function (method, route, handler) {
@@ -25,15 +23,13 @@ ServerRouter.prototype.route = function (method, route, handler) {
     for (var i = 0; i < method.length; i++) {
       methodRoute = method[i] + '/' + route.replace(/^[#/]/, '')
       this._router.on(methodRoute, function (params, req, res) {
-        var ctx = { params: params }
-        handler(req, res, ctx)
+        handler(req, res, params)
       })
     }
   } else {
     route = method.toUpperCase() + '/' + route.replace(/^[#/]/, '')
     this._router.on(route, function (params, req, res) {
-      var ctx = { params: params }
-      handler(req, res, ctx)
+      handler(req, res, params)
     })
   }
 }
