@@ -16,8 +16,8 @@ router.route('GET', '/hello', function (req, res, ctx) {
   res.end('hello world')
 })
 
-router.route('PUT', '/hello/:name', function (req, res, ctx) {
-  res.end('hi there ' + ctx.params.name)
+router.route('PUT', '/hello/:name', function (req, res, params) {
+  res.end('hi there ' + params.name)
 })
 
 http.createServer(router.start()).listen()
@@ -25,16 +25,12 @@ http.createServer(router.start()).listen()
 
 ## API
 ### router = serverRouter(opts)
-Create a new router with opts:
-- __default:__ (default: `'/404'`) Path to default to when a route is not
-  matched. If no default path is set, the router will crash when an unknown
-  path is encountered.
+Create a new router with opts.
 
-### router.route(method|routes, route, function(req, res, ctx))
+### router.route(method|routes, route, function(req, res, params))
 Register a new route with an HTTP method name and a routename. Can register
-multiple handlers by passing an array of method names. `ctx` is an object with
-`.params` property that contains any params. It's safe to extend `ctx` with
-other values for the duration of the request.
+multiple handlers by passing an array of method names. `params` contains
+matched partials from the route.
 
 ### router.match(req, res)
 Match a route on a router.
