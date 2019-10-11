@@ -10,7 +10,7 @@ function ServerRouter (opts) {
 
   opts = opts || {}
   assert.equal(typeof opts, 'object', 'server-router: opts should be type object')
-  this._router = wayfarer()
+  this._router = wayfarer(opts.default || '')
 }
 
 ServerRouter.prototype.route = function (method, route, handler) {
