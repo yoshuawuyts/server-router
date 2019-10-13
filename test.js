@@ -43,7 +43,7 @@ tape('server-router', function (t) {
     t.plan(1)
 
     var router = serverRouter({ default: '/foo' })
-    router.route('GET', '/foo', function (req, res, ctx) {
+    router.route('', '/foo', function (req, res, ctx) {
       t.pass('/foo called')
       res.end()
       server.close()
@@ -61,8 +61,8 @@ tape('server-router', function (t) {
     t.plan(1)
 
     var router = serverRouter({ default: '/foo' })
-    router.route('GET', '/foo/:bar', function (req, res, ctx) {
-      t.equal(ctx.params.bar, 'hi-there')
+    router.route('GET', '/foo/:bar', function (req, res, params) {
+      t.equal(params.bar, 'hi-there')
       res.end()
       server.close()
     })
