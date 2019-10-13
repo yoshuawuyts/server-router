@@ -20,6 +20,11 @@ router.route('PUT', '/hello/:name', function (req, res, params) {
   res.end('hi there ' + params.name)
 })
 
+router.route(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '*', (req, res) => {
+  res.status = 404
+  res.end('404')
+})
+
 http.createServer(router.start()).listen()
 ```
 
