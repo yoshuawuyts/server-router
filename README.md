@@ -32,7 +32,7 @@ http.createServer(router.start()).listen()
 ### router = serverRouter(opts)
 Create a new router with opts.
 
-### router.route(method|methods, route, function (req, res, params))
+### router.route(method|[methods], route, function (req, res, params))
 Register a new route with an HTTP method name and a routename. Can register
 multiple handlers by passing an array of method names. `params` contains
 matched partials from the route.
