@@ -10,14 +10,19 @@ streaming servers.
 var serverRouter = require('server-router')
 var http = require('http')
 
-var router = serverRouter()
+var router = serverRouter({ default: '/404' })
 
-router.route('GET', '/hello', function (req, res, ctx) {
+router.route('GET', '/hello', function (req, res, params) {
   res.end('hello world')
 })
 
 router.route('PUT', '/hello/:name', function (req, res, params) {
   res.end('hi there ' + params.name)
+})
+
+router.route('', '/404', function (req, res, params) {
+  res.status = 404
+  res.end('404')
 })
 
 http.createServer(router.start()).listen()
@@ -27,7 +32,7 @@ http.createServer(router.start()).listen()
 ### router = serverRouter(opts)
 Create a new router with opts.
 
-### router.route(method|routes, route, function(req, res, params))
+### router.route(method|[methods], route, function (req, res, params))
 Register a new route with an HTTP method name and a routename. Can register
 multiple handlers by passing an array of method names. `params` contains
 matched partials from the route.
